@@ -5,44 +5,32 @@ using StardewValley.Objects;
 using StardewModdingAPI;
 using HarmonyLib;
 using Microsoft.Xna.Framework;
+using System.Collections.Generic;
 
 namespace Butterfly_Collector
 {
-    public static class GameLocationPatches
+    public static class MonsterPatches
     {
-
-        private static IMonitor Monitor;
-
-        // call this method from your Entry class
-        public static void Initialize(IMonitor monitor)
+       
+        private static List<Item> GetExtraDropItems() 
         {
-            Monitor = monitor;
-        }
-
-        // Method to apply harmony patch
-        public static void Apply(Harmony harmony)
-        {
+            List<Item> itemList = new List<Item>(); //create a blank list            
+            if (getExtraDropItems() != null && location is BugLand)
             {
-                harmony.Patch(
-                    original: AccessTools.Method(typeof(GameLocation), nameof(GameLocation.monsterDrop)),
-                    postfix: new HarmonyMethod(typeof(GameLocationPatches), nameof(GameLocationPatches.MonsterDrop))
-                );
+                itemList.Add(new StardewValley.Object(276, 1, false, -1, 4)); //add 1 iridium-quality pumpkin
             }
+            return itemList; //return the completed list
+
         }
-        
-        private static void  MonsterDrop(GameLocation location, Monster monster, int x, int y, Farmer who)
+
+        public static void Enable(IModHelper helper)
         {
-            if (location is BugLand && monster is Grub && who is null && Game1.random.NextDouble() < 0.5)
+            if (enabled) //if this class is already enabled
+                return; //do nothing
 
-            {
-                      monster.ModifyMonsterLoot(
-                        new Debris(
-                                item: new Object(373, 1),
-                                debrisOrigin: new Vector2(x,y),
-                                targetLocation: who.Position));
-                                
-            }
         }
-
+        private static bool enabled = false;
+        /// <summary>While true, this class will attempt to find and customize the mobDrops.</summary>
+        private static bool editExtraDropItems = false;
     }
 }

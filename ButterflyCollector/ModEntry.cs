@@ -26,9 +26,7 @@ namespace ButterflyCollector
             helper.Events.GameLoop.DayStarted += this.OnDayStarted;
             helper.Events.GameLoop.GameLaunched += GameLoop_GameLaunched;
 
-            // Do the Harmony things in Dr Elizabeth Style
-            var harmony = new Harmony(this.ModManifest.UniqueID);
-            GameLocationPatches.Apply(harmony);
+            MonsterPatches.Enable(helper);
         }
 
         /// <summary>
