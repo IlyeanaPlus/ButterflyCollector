@@ -2,12 +2,9 @@
 using StardewModdingAPI.Events;
 using StardewValley;
 using System.Collections.Generic;
-using System.IO;
 using Pathoschild.Stardew.Common.Integrations.JsonAssets;
 using HarmonyLib;
-using StardewValley.Locations;
-using StardewValley.Monsters;
-using Microsoft.Xna.Framework;
+using Butterfly_Collector;
 
 namespace ButterflyCollector
 
@@ -16,7 +13,7 @@ namespace ButterflyCollector
     /// <summary>
     ///  The mod entry point
     /// </summary>
-    public partial class ModEntry : Mod
+    public class ModEntry : Mod
     {
         /// <summary>
         /// Create instance
@@ -29,6 +26,9 @@ namespace ButterflyCollector
             helper.Events.GameLoop.DayStarted += this.OnDayStarted;
             helper.Events.GameLoop.GameLaunched += GameLoop_GameLaunched;
 
+            // Do the Harmony things in Dr Elizabeth Style
+            var harmony = new Harmony(this.ModManifest.UniqueID);
+            MonsterPatches.Apply(harmony);
         }
 
         /// <summary>
@@ -38,7 +38,7 @@ namespace ButterflyCollector
         /// <param name="e"></param>
         private void OnDayStarted(object sender, DayStartedEventArgs e)
         {
-            Game1.addHUDMessage(new HUDMessage("It Kinda Works!", HUDMessage.achievement_type));
+            Game1.addHUDMessage(new HUDMessage("It Kinda Works!", HUDMessage.achievement_type)); //message to help track if code is working
         }
         /// <summary>
         /// Link to JA Api
@@ -52,7 +52,7 @@ namespace ButterflyCollector
 
         }
 
-
+        //Havent done stuff here yet
         /// List of IDs for butterflies in grass
         internal static HashSet<int> GrassyButterflyIDs { get; } = new();
 
