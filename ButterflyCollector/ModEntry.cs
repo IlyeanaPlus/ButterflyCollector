@@ -28,7 +28,7 @@ namespace ButterflyCollector
 
             // Do the Harmony things in Dr Elizabeth Style
             var harmony = new Harmony(this.ModManifest.UniqueID);
-            MonsterPatches.Apply(harmony);
+            GameLocationPatches.Apply(harmony);
         }
 
         /// <summary>

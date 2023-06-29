@@ -1,17 +1,14 @@
-﻿using System.Collections.Generic;
-using StardewValley;
+﻿using StardewValley;
 using StardewValley.Monsters;
-using StardewValley.Objects;
 using StardewValley.Locations;
+using StardewValley.Objects;
 using StardewModdingAPI;
 using HarmonyLib;
-using Pathoschild.Stardew.Common.Integrations.JsonAssets;
 using Microsoft.Xna.Framework;
-using System.Runtime.CompilerServices;
 
 namespace Butterfly_Collector
 {
-    public static class MonsterPatches
+    public static class GameLocationPatches
     {
 
         private static IMonitor Monitor;
@@ -26,19 +23,24 @@ namespace Butterfly_Collector
         public static void Apply(Harmony harmony)
         {
             {
-
                 harmony.Patch(
-                    original: AccessTools.Method(typeof(Monster), nameof(Monster.InitializeForLocation)),
-                    postfix: new HarmonyMethod(typeof(MonsterPatches), nameof(MonsterPatches.InitializeForLocation))
+                    original: AccessTools.Method(typeof(GameLocation), nameof(GameLocation.monsterDrop)),
+                    postfix: new HarmonyMethod(typeof(GameLocationPatches), nameof(GameLocationPatches.MonsterDrop))
                 );
             }
         }
         
-        private static void InitializeForLocation(GameLocation location)
+        private static void  MonsterDrop(GameLocation location, Monster monster, int x, int y, Farmer who)
         {
-            if (location is BugLand);
-            {
+            if (location is BugLand && monster is Grub && who is null && Game1.random.NextDouble() < 0.5)
 
+            {
+                      monster.ModifyMonsterLoot(
+                        new Debris(
+                                item: new Object(373, 1),
+                                debrisOrigin: new Vector2(x,y),
+                                targetLocation: who.Position));
+                                
             }
         }
 
