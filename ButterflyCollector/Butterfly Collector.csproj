@@ -19,6 +19,7 @@
 
   <ItemGroup>
 	  <Reference Include="ContentPatcher" HintPath="$(GameModsPath)\ContentPatcher\ContentPatcher.dll" Private="False" />
+	  <Reference Include="JsonAssets" HintPath="$(GameModsPath)\JsonAssets\JsonAssets.dll" Private="False" />
   </ItemGroup>
 	
 </Project>
