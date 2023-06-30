@@ -18,6 +18,7 @@ namespace ButterflyCollector
 
         // JsonAssets API
         private static SpaceShared.APIs.IJsonAssetsApi JA_API;
+        private static ContentPatcher.IContentPatcherAPI CP_API;
 
         // JsonAssets Names
         private static string blueButterflyName = "IlyBlueButterfly";
@@ -59,18 +60,19 @@ namespace ButterflyCollector
             var harmony = new Harmony(this.ModManifest.UniqueID);
         }
 
-        // Load JA Assets
+        // Load JA & CP Stuff
         private void OnGameLaunched(object sender, GameLaunchedEventArgs e)
         {
             JA_API = Helper.ModRegistry.GetApi<IJsonAssetsApi>("spacechase0.JsonAssets");
             JA_API.LoadAssets(Path.Combine(Helper.DirectoryPath, "assets", "json-assets"), Helper.Translation);
-           
+
+            CP_API = Helper.ModRegistry.GetApi<ContentPatcher.IContentPatcherAPI>("Pathoschild.ContentPatcher");
+            ///CP_API.??????????(Path.Combine(Helper.DirectoryPath, "assets", "cpa-assets"), Helper.Translation);
         }
 
 
         private void OnSaveLoaded(object sender, SaveLoadedEventArgs e)
         {
-            this.Helper.ModRegistry.GetApi<ContentPatcher.IContentPatcherAPI>("Pathoschild.ContentPatcher");
         }
 
 
