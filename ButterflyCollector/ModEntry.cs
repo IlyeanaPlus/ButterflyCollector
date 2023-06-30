@@ -1,10 +1,14 @@
 ﻿using StardewModdingAPI;
 using StardewModdingAPI.Events;
+using StardewModdingAPI.Utilities;
 using StardewValley;
 using System.Collections.Generic;
 using Pathoschild.Stardew.Common.Integrations.JsonAssets;
-using SpaceShared.APIs;
 using HarmonyLib;
+using System;
+using System.IO;
+using SpaceShared.APIs;
+using System.Net;
 
 namespace ButterflyCollector
 
@@ -16,6 +20,33 @@ namespace ButterflyCollector
         /// <summary> Create instance </summary>
         public static Mod instance;
 
+        // JsonAssets API
+        private static SpaceShared.APIs.IJsonAssetsApi JA_API;
+
+        //Useful Strings
+        private static string jsonAssetsModID = "Ilyeana.ButterflyCollectorJA";
+        private static string contentPackMoDID = "Ilyeana.ButterflyCollectorCP";
+
+        // JsonAssets Names
+        private static string blueButterflyName = jsonAssetsModID + "Blue Butterfly";
+        private static string blueEmperorName = jsonAssetsModID + "Blue Emperor Butterfly";
+        private static string cabbageWhiteName = jsonAssetsModID + "Cabbage White Butterfly";
+        private static string monarchName = jsonAssetsModID + "Monarch Butterfly";
+        private static string morningCloakName = jsonAssetsModID + "Morning Cloak Butterfly";
+        private static string orangeSulphurName = jsonAssetsModID + "Orange Suphur Butterfly";
+        private static string paintedLadyName = jsonAssetsModID + "Painted Lady Butterfly";
+        private static string tigerSwallowtailName = jsonAssetsModID + "Tiger Swallowtail Butterfly";
+
+        // JsonAssets IDs
+        public static int BlueButterflyID = JA_API.GetObjectId(blueButterflyName);
+        public static int BlueEmperorID = JA_API.GetObjectId(blueEmperorName);
+        public static int CabbageWhiteID = JA_API.GetObjectId(cabbageWhiteName);
+        public static int MonarchID = JA_API.GetObjectId(monarchName);
+        public static int MorningCloakID = JA_API.GetObjectId(morningCloakName);
+        public static int OrangeSulphurID = JA_API.GetObjectId(orangeSulphurName);
+        public static int PaintedLadyID = JA_API.GetObjectId(paintedLadyName);
+        public static int TigerSwallowtailID = JA_API.GetObjectId(tigerSwallowtailName);
+
         //Butterfly Type Lists
         private static Dictionary<ISalable, int[]> grassyButterflies;
         private static Dictionary<ISalable, int[]> cropButterflies;
@@ -23,28 +54,22 @@ namespace ButterflyCollector
         private static Dictionary<ISalable, int[]> questButterflies;
         private static Dictionary<ISalable, int[]> monsterButterflies;
 
-        //Useful Strings
-        private static string jsonAssetsModID = "Ilyeana.ButterflyCollectorJA";
-        private static string contentPackMoDID = "Ilyeana.ButterflyCollectorCP";
-
-        // JsonAssets item names
-        private static string blue = jsonAssetsModID + "/IlyBlue";
-        private static string blueEmperor = jsonAssetsModID + "/IlyBlueEmperor";
-        private static string cabbageWhite = jsonAssetsModID + "/IlyCabbageWhite";
-        private static string monarch= jsonAssetsModID + "/IlyMonarch";
-        private static string morningCloak = jsonAssetsModID + "/IlyMorningCloak";
-        private static string orangeSulphur = jsonAssetsModID + "/IlyOrangeSulphur";
-        private static string paintedLady = jsonAssetsModID + "/IlyPaintedLady";
-        private static string tigerSwallowtail = jsonAssetsModID + "/IlyTigerSwallowtail";
 
         /// <summary>The mod entry point, called after the mod is first loaded.</summary>
         /// <param name="helper">Provides simplified APIs for writing mods.</param>
         public override void Entry(IModHelper helper)
         {
+            helper.Events.GameLoop.GameLaunched += this.OnGameLaunched;
             helper.Events.GameLoop.SaveLoaded += this.OnSaveLoaded;
             helper.Events.GameLoop.DayStarted += this.OnDayStarted;
             var harmony = new Harmony(this.ModManifest.UniqueID);
         }
+
+        private void OnGameLaunched(object sender, GameLaunchedEventArgs e)
+        {
+
+        }
+
 
         /// <summary> Test Message & Initialize critters</summary>
         /// <param name="sender"></param>
@@ -55,6 +80,7 @@ namespace ButterflyCollector
             this.Helper.ModRegistry.GetApi<SpaceShared.APIs.IJsonAssetsApi>("spacechase0.JsonAssets");
         }
 
+         
         private void OnDayStarted(object sender, DayStartedEventArgs e)
         { 
 
@@ -70,36 +96,57 @@ namespace ButterflyCollector
         //Grassy Butterflies
         private static Dictionary<ISalable, int[]> getGrassyButterflies()
         {
-            Dictionary<ISalable, int[]> extraItems = new Dictionary<ISalable, int[]>();
-            extraItems.Add((ISalable)      (cabbageWhite), new int[2] { 50000, 1 });
+            Dictionary<ISalable, int[]> extraItems = new Dictionary<ISalable, int[]>
+            {
+                { new StardewValley.Object(BlueButterflyID, 1), new int[2] { 100, 1 } },
+                { new StardewValley.Object(CabbageWhiteID, 1), new int[2] { 200, 1 } },
+                { new StardewValley.Object(OrangeSulphurID, 1), new int[2] { 200, 1 } },
+                { new StardewValley.Object(MorningCloakID, 1), new int[2] { 200, 1 } }
+
+            };
+
             return extraItems;
         }
+
         //Crop Butterflies
         private static Dictionary<ISalable, int[]> getCropButterflies()
         {
-            Dictionary<ISalable, int[]> extraItems = new Dictionary<ISalable, int[]>();
-            extraItems.Add(new StardewValley.Object(268, 1), new int[2] { 5000, 1 });
+            Dictionary<ISalable, int[]> extraItems = new Dictionary<ISalable, int[]>
+            {
+                { new StardewValley.Object(CabbageWhiteID, 1), new int[2] { 500, 1 } },
+                { new StardewValley.Object(PaintedLadyID, 1), new int[2] { 500, 1 } },
+                { new StardewValley.Object(MonarchID, 1), new int[2] { 500, 1 } }
+            };
             return extraItems;
         }
+
         //Shop Butterflies
         private static Dictionary<ISalable, int[]> getShopButterflies()
         {
-            Dictionary<ISalable, int[]> extraItems = new Dictionary<ISalable, int[]>();
-            extraItems.Add(new StardewValley.Object(268, 1), new int[2] { 5000, 1 });
+            Dictionary<ISalable, int[]> extraItems = new Dictionary<ISalable, int[]>
+            {
+                { new StardewValley.Object(BlueEmperorID, 1), new int[2] { 10000, 1 } }
+            };
             return extraItems;
         }
+
         //Quest Butterflies
         private static Dictionary<ISalable, int[]> getQuestButterflies()
         {
-            Dictionary<ISalable, int[]> extraItems = new Dictionary<ISalable, int[]>();
-            extraItems.Add(new StardewValley.Object(268, 1), new int[2] { 5000, 1 });
+            Dictionary<ISalable, int[]> extraItems = new Dictionary<ISalable, int[]>
+            {
+                { new StardewValley.Object(BlueEmperorID, 1), new int[2] { 5000, 1 } }
+            };
             return extraItems;
         }
+
         //Monster Butterflies
         private static Dictionary<ISalable, int[]> getMonsterButterflies()
         {
-            Dictionary<ISalable, int[]> extraItems = new Dictionary<ISalable, int[]>();
-            extraItems.Add(new StardewValley.Object(268, 1), new int[2] { 5000, 1 });
+            Dictionary<ISalable, int[]> extraItems = new Dictionary<ISalable, int[]>
+            {
+                { new StardewValley.Object(TigerSwallowtailID, 1), new int[2] { 5000, 1 } }
+            };
             return extraItems;
         }
     }
