@@ -1,21 +1,17 @@
 ﻿using StardewModdingAPI;
 using StardewModdingAPI.Events;
-using StardewModdingAPI.Utilities;
 using StardewValley;
 using System.Collections.Generic;
-using Pathoschild.Stardew.Common.Integrations.JsonAssets;
 using HarmonyLib;
-using System;
 using System.IO;
 using SpaceShared.APIs;
-using System.Net;
 
 namespace ButterflyCollector
 
 {
 
     /// <summary> The mod entry point </summary>
-    public class ModEntry : Mod
+    internal sealed class ModEntry : Mod
     {
         /// <summary> Create instance </summary>
         public static Mod instance;
@@ -23,29 +19,25 @@ namespace ButterflyCollector
         // JsonAssets API
         private static SpaceShared.APIs.IJsonAssetsApi JA_API;
 
-        //Useful Strings
-        private static string jsonAssetsModID = "Ilyeana.ButterflyCollectorJA";
-        private static string contentPackMoDID = "Ilyeana.ButterflyCollectorCP";
-
         // JsonAssets Names
-        private static string blueButterflyName = jsonAssetsModID + "Blue Butterfly";
-        private static string blueEmperorName = jsonAssetsModID + "Blue Emperor Butterfly";
-        private static string cabbageWhiteName = jsonAssetsModID + "Cabbage White Butterfly";
-        private static string monarchName = jsonAssetsModID + "Monarch Butterfly";
-        private static string morningCloakName = jsonAssetsModID + "Morning Cloak Butterfly";
-        private static string orangeSulphurName = jsonAssetsModID + "Orange Suphur Butterfly";
-        private static string paintedLadyName = jsonAssetsModID + "Painted Lady Butterfly";
-        private static string tigerSwallowtailName = jsonAssetsModID + "Tiger Swallowtail Butterfly";
+        private static string blueButterflyName = "IlyBlueButterfly";
+        private static string blueEmperorName =   "IlyBlueEmperor";
+        private static string cabbageWhiteName = "IlyCabbageWhite";
+        private static string monarchName =  "IlyMonarch";
+        private static string morningCloakName =  "IlyMorningCloak";
+        private static string orangeSulphurName =  "IlyOrangeSulphur";
+        private static string paintedLadyName =  "IlyPaintedLady";
+        private static string tigerSwallowtailName =  "IlyTigerSwallowtail";
 
         // JsonAssets IDs
-        public static int BlueButterflyID = JA_API.GetObjectId(blueButterflyName);
-        public static int BlueEmperorID = JA_API.GetObjectId(blueEmperorName);
-        public static int CabbageWhiteID = JA_API.GetObjectId(cabbageWhiteName);
-        public static int MonarchID = JA_API.GetObjectId(monarchName);
-        public static int MorningCloakID = JA_API.GetObjectId(morningCloakName);
-        public static int OrangeSulphurID = JA_API.GetObjectId(orangeSulphurName);
-        public static int PaintedLadyID = JA_API.GetObjectId(paintedLadyName);
-        public static int TigerSwallowtailID = JA_API.GetObjectId(tigerSwallowtailName);
+        public static int BlueButterflyID => JA_API.GetObjectId(blueButterflyName);
+        public static int BlueEmperorID => JA_API.GetObjectId(blueEmperorName);
+        public static int CabbageWhiteID => JA_API.GetObjectId(cabbageWhiteName);
+        public static int MonarchID => JA_API.GetObjectId(monarchName);
+        public static int MorningCloakID => JA_API.GetObjectId(morningCloakName);
+        public static int OrangeSulphurID => JA_API.GetObjectId(orangeSulphurName);
+        public static int PaintedLadyID => JA_API.GetObjectId(paintedLadyName);
+        public static int TigerSwallowtailID => JA_API.GetObjectId(tigerSwallowtailName);
 
         //Butterfly Type Lists
         private static Dictionary<ISalable, int[]> grassyButterflies;
@@ -62,25 +54,29 @@ namespace ButterflyCollector
             helper.Events.GameLoop.GameLaunched += this.OnGameLaunched;
             helper.Events.GameLoop.SaveLoaded += this.OnSaveLoaded;
             helper.Events.GameLoop.DayStarted += this.OnDayStarted;
+
+            // Set up some things
             var harmony = new Harmony(this.ModManifest.UniqueID);
         }
 
+        // Load JA Assets
         private void OnGameLaunched(object sender, GameLaunchedEventArgs e)
         {
-
+            JA_API = Helper.ModRegistry.GetApi<IJsonAssetsApi>("spacechase0.JsonAssets");
+            JA_API.LoadAssets(Path.Combine(Helper.DirectoryPath, "assets", "json-assets"), Helper.Translation);
+           
         }
 
 
-        /// <summary> Test Message & Initialize critters</summary>
-        /// <param name="sender"></param>
-        /// <param name="e"></param>
         private void OnSaveLoaded(object sender, SaveLoadedEventArgs e)
         {
             this.Helper.ModRegistry.GetApi<ContentPatcher.IContentPatcherAPI>("Pathoschild.ContentPatcher");
-            this.Helper.ModRegistry.GetApi<SpaceShared.APIs.IJsonAssetsApi>("spacechase0.JsonAssets");
         }
 
-         
+
+        /// <summary>Initialize Critters</summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>        
         private void OnDayStarted(object sender, DayStartedEventArgs e)
         { 
 

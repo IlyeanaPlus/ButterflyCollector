@@ -1,0 +1,26 @@
+{
+    "Name": "IlyMonarch",
+    "Description": "...",
+    "TranslationKey":"Monarch",
+    "Category": "Flower",
+    "CategoryTextOverride": "Critter",
+    "Edibility": 0,
+    "EdibleIsDrink": false,
+    "EdibleBuffs": null,
+    "Price": 500,
+    "GiftTastes":
+    {
+        "Love": [ "Demetrius", "Dwarf", "Linus", "Leo", "Caroline", "Evelyn", "Sandy", "Kent" ],
+        "Like": [ "Leah", "Abigail", "Emily", "Jas", "Jodi", "Marnie", "Robin", "Sam", "Willy", "Wizard" ],
+        "Dislike": [ "George", "Harvey", "Clint", "Elliot", "Gus", "Maru", "Penny", "Pierre", "Krobus" ],
+        "Hate": [ "Haley", "Sebastian", "Shane", "Pam", "Lewis", "Clint", "Alex" ]
+    },
+    "Recipe": null,
+    "CanPurchase": false,       
+	"ContextTags":
+        [
+        "Butterfly",
+        "Orange",
+        "Rare"    
+		]
+}
