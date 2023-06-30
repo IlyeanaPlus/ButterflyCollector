@@ -3,10 +3,9 @@
   <PropertyGroup>
     <TargetFramework>net5.0</TargetFramework>
 	<EnableHarmony>true</EnableHarmony>
-	<ModFolderName>Butterfly Collector by Ilyeana</ModFolderName>
-	<GameModsPath>$(GameModsPath)/$(AssemblyName)</GameModsPath>
-	<EnableModZip>false</EnableModZip>
-  </PropertyGroup>
+	<GameModsPath>C:\Program Files (x86)\Steam\steamapps\common\Stardew Valley\mods\Butterfly Collector by Ilyeana</GameModsPath>
+	<ModFolderName>DLL Butterfly Collector</ModFolderName>  
+	</PropertyGroup>
 
   <ItemGroup>
     <Compile Remove="Harmony Patches\**" />
@@ -22,18 +21,8 @@
   <ItemGroup>
     <Reference Include="JsonAssets">
       <HintPath>..\..\..\..\..\..\Program Files (x86)\Steam\steamapps\common\Stardew Valley\mods\JsonAssets\JsonAssets.dll</HintPath>
+      <Private>False</Private>
     </Reference>
   </ItemGroup>
-
-  <Target Name="DeployPack" AfterTargets="Build">
-	  <Message Text="Running DeployPack target..." />
-	  <ItemGroup>
-		  <_FilesToCopy Include="$(ProjectDir)pack/**/*" />
-	  </ItemGroup>
-
-	  <Copy SourceFiles="@(_FilesToCopy)" DestinationFiles="@(_FilesToCopy->'$(GameModsPath)/%(RecursiveDir)%(Filename)%(Extension)')" />
-	  <!-- Use ZipDirectory after build. -->
-	  <ZipDirectory DestinationFile="$(ModZipPath)/$(AssemblyName) $(Version).zip" SourceDirectory="$(GameModsPath)" Overwrite="True" />
-  </Target>
 	
   </Project>

@@ -1,0 +1,18 @@
+{
+  "Name": "Butterfly Collector",
+  "Author": "Ilyeana",
+  "Version": "1.0.0",
+  "Description": "Adds a fun nature and collection package to Stardew Valley",
+  "UniqueID": "Ilyeana.ButterflyCollector",
+  "EntryDll": "Butterfly Collector.dll",
+  "UpdateKeys": [ "Nexus:???" ],
+  "Dependencies": [
+    {
+      "UniqueID": "Pathoschild.ContentPatcher",
+      "MinimumVersion": "1.29.0"
+    },
+    {
+      "UniqueID": "spacechase0.JsonAssets"
+    }
+  ]
+}
