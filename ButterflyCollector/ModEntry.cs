@@ -5,6 +5,11 @@ using System.Collections.Generic;
 using HarmonyLib;
 using System.IO;
 using SpaceShared.APIs;
+using System;
+using StardewValley.Menus;
+using StardewValley.TerrainFeatures;
+using Microsoft.Xna.Framework;
+using SObject = StardewValley.Object;
 
 namespace ButterflyCollector
 {
@@ -16,27 +21,16 @@ namespace ButterflyCollector
 
         // JsonAssets API
         private static IJsonAssetsApi JA_API;
-  
-
-        // JsonAssets Names
-        private static string blueButterflyName = "IlyBlueButterfly";
-        private static string blueEmperorName =   "IlyBlueEmperor";
-        private static string cabbageWhiteName = "IlyCabbageWhite";
-        private static string monarchName =  "IlyMonarch";
-        private static string morningCloakName =  "IlyMorningCloak";
-        private static string orangeSulphurName =  "IlyOrangeSulphur";
-        private static string paintedLadyName =  "IlyPaintedLady";
-        private static string tigerSwallowtailName =  "IlyTigerSwallowtail";
 
         // JsonAssets IDs
-        public static int BlueButterflyID => JA_API.GetObjectId(blueButterflyName);
-        public static int BlueEmperorID => JA_API.GetObjectId(blueEmperorName);
-        public static int CabbageWhiteID => JA_API.GetObjectId(cabbageWhiteName);
-        public static int MonarchID => JA_API.GetObjectId(monarchName);
-        public static int MorningCloakID => JA_API.GetObjectId(morningCloakName);
-        public static int OrangeSulphurID => JA_API.GetObjectId(orangeSulphurName);
-        public static int PaintedLadyID => JA_API.GetObjectId(paintedLadyName);
-        public static int TigerSwallowtailID => JA_API.GetObjectId(tigerSwallowtailName);
+        public static int BlueButterflyID => JA_API.GetObjectId("IlyBlueButterfly");
+        public static int BlueEmperorID => JA_API.GetObjectId("IlyBlueEmperor");
+        public static int CabbageWhiteID => JA_API.GetObjectId("IlyCabbageWhite");
+        public static int MonarchID => JA_API.GetObjectId("IlyMonarch");
+        public static int MorningCloakID => JA_API.GetObjectId("IlyMorningCloak");
+        public static int OrangeSulphurID => JA_API.GetObjectId("IlyOrangeSulphur");
+        public static int PaintedLadyID => JA_API.GetObjectId("IlyPaintedLady");
+        public static int TigerSwallowtailID => JA_API.GetObjectId("IlyTigerSwallowtail");
 
         //Butterfly Type Lists
         public static Dictionary<ISalable, int[]> grassyButterflies;
@@ -45,18 +39,26 @@ namespace ButterflyCollector
         public static Dictionary<ISalable, int[]> questButterflies;
         public static Dictionary<ISalable, int[]> monsterButterflies;
 
+        // Helper
+        private static IModHelper helperStatic;
+
 
         /// <summary>The mod entry point, called after the mod is first loaded.</summary>
         /// <param name="helper">Provides simplified APIs for writing mods.</param>
         public override void Entry(IModHelper helper)
         {
             helper.Events.GameLoop.GameLaunched += this.OnGameLaunched;
+            helper.Events.GameLoop.SaveCreated += this.OnSaveCreated;
             helper.Events.GameLoop.SaveLoaded += this.OnSaveLoaded;
             helper.Events.GameLoop.DayStarted += this.OnDayStarted;
+            helper.Events.Input.ButtonPressed += this.OnButtonPressed;
 
             // Set up some things
             var harmony = new Harmony(this.ModManifest.UniqueID);
+
+            helperStatic = helper;
         }
+
 
         // Load JA Stuff
         private void OnGameLaunched(object sender, GameLaunchedEventArgs e)
@@ -66,14 +68,32 @@ namespace ButterflyCollector
         }
 
 
-        private void OnSaveLoaded(object sender, SaveLoadedEventArgs e)
+
+        // Testing Butterflies from farm grass
+        private void OnSaveCreated(object sender, SaveCreatedEventArgs e)
         {
+            Game1.getFarm().resourceClumps.OnValueRemoved += this.OnClumpRemoved;
         }
 
-        /// <summary>Initialize Critters</summary>
-        /// <param name="sender"></param>
-        /// <param name="e"></param>        
-        private void OnDayStarted(object sender, DayStartedEventArgs e)
+        private void OnSaveLoaded(object sender, SaveLoadedEventArgs e)
+        {
+            Game1.getFarm().resourceClumps.OnValueRemoved += this.OnClumpRemoved;
+        }
+
+        private void OnClumpRemoved(ResourceClump value)
+        {
+            if (value.parentSheetIndex.Value == ResourceClump.boulderIndex)
+            {
+                Random r = new Random((int)value.tile.X * 1000 + (int)value.tile.Y);
+                Game1.createMultipleObjectDebris(BlueEmperorID, (int)value.tile.X, (int)value.tile.Y, 7 + r.Next(15));
+            }
+
+        }
+
+            /// <summary>Initialize Critters</summary>
+            /// <param name="sender"></param>
+            /// <param name="e"></param>        
+            public void OnDayStarted(object sender, DayStartedEventArgs e)
         { 
 
             Game1.addHUDMessage(new HUDMessage("It Kinda Works!", HUDMessage.achievement_type)); //message to help track if code is working
@@ -141,5 +161,34 @@ namespace ButterflyCollector
             };
             return extraItems;
         }
+        private void OnButtonPressed(object sender, ButtonPressedEventArgs e)
+        {
+
+            // Exit if something is in progress/player shouldn't be able to interact with things
+            if (Game1.activeClickableMenu != null)
+            {
+                return;
+            }
+
+            if (e.Button.IsActionButton())
+            {
+                if ((e.Cursor.GrabTile.X == 47 || e.Cursor.GrabTile.X == 48) && e.Cursor.GrabTile.Y == 34)
+                {
+                    suppressClick();
+                    ShopMenu ilyMapleShop  = new ShopMenu(shopButterflies, 0, "Maple Bear", null, null, "Ilyeana.MapleShopSTF");
+                }
+
+
+
+            }
+        }
+        private static void suppressClick()
+        {
+            helperStatic.Input.Suppress(Game1.options.actionButton[0].ToSButton());
+            helperStatic.Input.Suppress(Game1.options.useToolButton[0].ToSButton());
+            helperStatic.Input.Suppress(SButton.MouseLeft);
+            helperStatic.Input.Suppress(SButton.MouseRight);
+        }
+
     }
 }
