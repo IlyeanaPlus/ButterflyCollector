@@ -7,9 +7,7 @@ using System.IO;
 using SpaceShared.APIs;
 
 namespace ButterflyCollector
-
 {
-
     /// <summary> The mod entry point </summary>
     internal sealed class ModEntry : Mod
     {
@@ -17,8 +15,8 @@ namespace ButterflyCollector
         public static Mod instance;
 
         // JsonAssets API
-        private static SpaceShared.APIs.IJsonAssetsApi JA_API;
-        private static ContentPatcher.IContentPatcherAPI CP_API;
+        private static IJsonAssetsApi JA_API;
+  
 
         // JsonAssets Names
         private static string blueButterflyName = "IlyBlueButterfly";
@@ -41,11 +39,11 @@ namespace ButterflyCollector
         public static int TigerSwallowtailID => JA_API.GetObjectId(tigerSwallowtailName);
 
         //Butterfly Type Lists
-        private static Dictionary<ISalable, int[]> grassyButterflies;
-        private static Dictionary<ISalable, int[]> cropButterflies;
-        private static Dictionary<ISalable, int[]> shopButterflies;
-        private static Dictionary<ISalable, int[]> questButterflies;
-        private static Dictionary<ISalable, int[]> monsterButterflies;
+        public static Dictionary<ISalable, int[]> grassyButterflies;
+        public static Dictionary<ISalable, int[]> cropButterflies;
+        public static Dictionary<ISalable, int[]> shopButterflies;
+        public static Dictionary<ISalable, int[]> questButterflies;
+        public static Dictionary<ISalable, int[]> monsterButterflies;
 
 
         /// <summary>The mod entry point, called after the mod is first loaded.</summary>
@@ -60,21 +58,17 @@ namespace ButterflyCollector
             var harmony = new Harmony(this.ModManifest.UniqueID);
         }
 
-        // Load JA & CP Stuff
+        // Load JA Stuff
         private void OnGameLaunched(object sender, GameLaunchedEventArgs e)
         {
             JA_API = Helper.ModRegistry.GetApi<IJsonAssetsApi>("spacechase0.JsonAssets");
             JA_API.LoadAssets(Path.Combine(Helper.DirectoryPath, "assets", "json-assets"), Helper.Translation);
-
-            CP_API = Helper.ModRegistry.GetApi<ContentPatcher.IContentPatcherAPI>("Pathoschild.ContentPatcher");
-            ///CP_API.??????????(Path.Combine(Helper.DirectoryPath, "assets", "cpa-assets"), Helper.Translation);
         }
 
 
         private void OnSaveLoaded(object sender, SaveLoadedEventArgs e)
         {
         }
-
 
         /// <summary>Initialize Critters</summary>
         /// <param name="sender"></param>
