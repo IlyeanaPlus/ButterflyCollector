@@ -5,14 +5,12 @@ using StardewModdingAPI.Events;
 using StardewValley;
 using StardewValley.Locations;
 using StardewValley.TerrainFeatures;
-using StardewValley.Objects;
 using System.Collections.Generic;
 using System;
 using System.IO;
 using Microsoft.Xna.Framework;
-using System.Diagnostics;
-using Object = StardewValley.Object;
 using System.Linq;
+using Netcode;
 
 namespace Butterfly_Collector
 {
@@ -35,37 +33,7 @@ namespace Butterfly_Collector
         public static int PaintedLadyID => JA_API.GetObjectId("IlyPaintedLady");
         public static int TigerSwallowtailID => JA_API.GetObjectId("IlyTigerSwallowtail");
 
-        public static Dictionary<string, List<int>> indexKeys = new Dictionary<string, List<int>>
-        {
-            {
-                "Weeds",
-                new List<int>
-                {
-                    343, 450, 674, 675, 676, 677, 678, 679, 784, 785,
-                    786, 792, 793, 794
-                }
-            },
-            {
-                "Twig",
-                new List<int> { 294, 295 }
-            },
-            {
-                "Rock",
-                new List<int> { 450, 343 }
-            },
-            {
-                "Stump",
-                new List<int> { 600 }
-            },
-            {
-                "Log",
-                new List<int> { 602 }
-            },
-            {
-                "Boulder",
-                new List<int> { 672 }
-            }
-        };
+       
 
         /// <summary>The mod entry point, called after the mod is first loaded.</summary>
         /// <param name="helper">Provides simplified APIs for writing mods.</param>
@@ -75,7 +43,7 @@ namespace Butterfly_Collector
 
             helper.Events.GameLoop.GameLaunched += OnGameLaunched;
             helper.Events.GameLoop.DayStarted += OnDayStarted;
-            helper.Events.World.DebrisListChanged += OnDebrisListChanged;
+            helper.Events.World.LargeTerrainFeatureListChanged += OnLargeTerrainFeatureListChanged;
             helper.Events.World.TerrainFeatureListChanged += TerrainFeatureListChanged;
 
 
@@ -97,49 +65,106 @@ namespace Butterfly_Collector
         //Test Message       
         public void OnDayStarted(object sender, DayStartedEventArgs e)
         {
-            Game1.addHUDMessage(new HUDMessage("It Kinda Works!", HUDMessage.achievement_type)); //message to help track if code is working
+            Game1.addHUDMessage(new HUDMessage("Good Luck!", HUDMessage.achievement_type)); //message to help track if code is working
 
         }
 
-        //Critter from Weeds
-        private void OnDebrisListChanged(object sender, DebrisListChangedEventArgs e)
+        //Critter from Bush
+        private void OnLargeTerrainFeatureListChanged(object sender, LargeTerrainFeatureListChangedEventArgs e)
         {
-            if (e.Removed.Any())
-            {               
-                foreach (Debris d in e.Removed)
+           foreach (LargeTerrainFeature ltf in e.Removed)
+            {
+                if (e.Location is Farm or IslandWest && ltf is Bush)
                 {
-                    if (e.Location is Farm or IslandWest && d.item?.Name is "Weeds")
-                        if (d.debrisType.Value == Debris.DebrisType.CHUNKS || d.debrisType.Value == Debris.DebrisType.SPRITECHUNKS || d.debrisType.Value == Debris.DebrisType.NUMBERS)
-                            continue;
-                    {
-                        //Some kind of math goes here to determine drop chance
+                    //Some kind of math goes here to determine drop chance
 
-                        Game1.player.addItemToInventory(new StardewValley.Object(MorningCloakID, 1, false, -1, 0));
-                        Game1.addHUDMessage(new("You found a Butterfly in the Weeds!", HUDMessage.achievement_type));
-                        Game1.playSound("pickUpItem");
-                    }
+                    Game1.player.addItemToInventory(new StardewValley.Object(MorningCloakID, 1, false, -1, 0));
+                    Game1.addHUDMessage(new("You found a Butterfly in the Bushes!", HUDMessage.achievement_type));
+                    Game1.playSound("pickUpItem");
                 }
             }
-                    
         }
-        
-
-        public void TerrainFeatureListChanged(object sender, TerrainFeatureListChangedEventArgs e)
+        //Critters from Grass, Trees, (ResourceClumps?)
+        public void TerrainFeatureListChanged(object sender, TerrainFeatureListChangedEventArgs e) //Event.World from SMAPI
         {
             foreach (KeyValuePair<Vector2, TerrainFeature> item in e.Removed)
             {
-                if (item.Value is Grass grass && grass.numberOfWeeds.Value <= 0 && grass.grassType.Value == 1)
+                if (e.Location is Farm && item.Value is Grass grass && grass.numberOfWeeds.Value <= 0 && grass.grassType.Value == 1) //Grass Daytime (default)
                 {
                     if (new Random((int)(Game1.uniqueIDForThisGame + item.Key.X * 1000.0 + item.Key.Y * 11.0))
-                             .NextDouble() < 0.008)
+                            .NextDouble() < 0.008) //0.8% chance to drop PER grass node
                     {
-                        Game1.addHUDMessage(new("You found a Butterfly in the Grass!", HUDMessage.achievement_type));
-                        Game1.player.addItemToInventory(new StardewValley.Object(CabbageWhiteID, 1, false, -1, 0));
+                        Game1.addHUDMessage(new("You found a Butterfly in the Grass!", HUDMessage.achievement_type)); //Might remove message later
+                        Game1.player.addItemToInventory(new StardewValley.Object(CabbageWhiteID, 1, false, -1, 0)); //Butterfly to drop
                         Game1.playSound("pickUpItem");
                     }
-
+                 
                 }
+                else if (e.Location is Farm && item.Value is Tree tree && tree.growthStage.Value == 5 && tree.treeType.Value == 1) //Tree 1 is Oak
+                {
+                    if (new Random((int)(Game1.uniqueIDForThisGame + (item.Key.X * 1000.0) + (item.Key.Y * 11.0)))
+                            .NextDouble() < 0.5) //50% chance to drop from the Oak tree
+                    {
+                        Game1.addHUDMessage(new("You found a Butterfly in the Oak Tree!", HUDMessage.achievement_type)); //Might remove message later
+                        Game1.player.addItemToInventory(new StardewValley.Object(MonarchID, 1, false, -1, 0)); //Butterfly to drop
+                        Game1.playSound("pickUpItem");
+                    }
+                }
+                else if (e.Location is Farm && item.Value is Tree tree2 && tree2.growthStage.Value == 5 && tree2.treeType.Value == 2) //Tree 2 is Maple
+                {
+                    if (new Random((int)(Game1.uniqueIDForThisGame + item.Key.X * 1000.0 + item.Key.Y * 11.0))
+                            .NextDouble() < 0.5) //50% chance to drop from the Maple tree
+                    {
+                        Game1.addHUDMessage(new("You found a Butterfly in the Maple Tree!", HUDMessage.achievement_type)); //Might remove message later
+                        Game1.player.addItemToInventory(new StardewValley.Object(TigerSwallowtailID, 1, false, -1, 0)); //Butterfly to drop
+                        Game1.playSound("pickUpItem");
+                    }
+                }
+                else if (e.Location is Farm && item.Value is Tree tree3 && tree3.growthStage.Value == 5 && tree3.treeType.Value == 3) //Tree 3 is Pine
+                {
+                    if (new Random((int)(Game1.uniqueIDForThisGame + item.Key.X * 1000.0 + item.Key.Y * 11.0))
+                            .NextDouble() < 0.5) //50% chance to drop from the Pine tree
+                    {
+                        Game1.addHUDMessage(new("You found a Butterfly in the Pine Tree!", HUDMessage.achievement_type)); //Might remove message later
+                        Game1.player.addItemToInventory(new StardewValley.Object(PaintedLadyID, 1, false, -1, 0)); //Butterfly to drop
+                        Game1.playSound("pickUpItem");
+                    }
+                }
+                else if (e.Location is Desert && item.Value is Tree tree6 && tree6.growthStage.Value == 5 && tree6.treeType.Value == 6) //Tree 6 is Desert Palm
+                {
+                    if (new Random((int)(Game1.uniqueIDForThisGame + item.Key.X * 1000.0 + item.Key.Y * 11.0))
+                            .NextDouble() < 0.20) //20% chance to drop from the Desert Palm tree
+                    {
+                        Game1.addHUDMessage(new("You found a Butterfly in the Desert Palm Tree!", HUDMessage.achievement_type)); //Might remove message later
+                        Game1.player.addItemToInventory(new StardewValley.Object(OrangeSulphurID, 1, false, -1, 0)); //Butterfly to drop
+                        Game1.playSound("pickUpItem");
+                    }
+                }
+                else if (e.Location is Farm or IslandWest or IslandNorth && item.Value is Tree tree8 && tree8.growthStage.Value == 5 && tree8.treeType.Value == 8) //Tree 8 is Mahogany
+                {
+                    if (new Random((int)(Game1.uniqueIDForThisGame + item.Key.X * 1000.0 + item.Key.Y * 11.0))
+                            .NextDouble() < 0.10) //10% chance to drop from the Mahogany tree
+                    {
+                        Game1.addHUDMessage(new("You found a Butterfly in the Mahogany Tree!", HUDMessage.achievement_type)); //Might remove message later
+                        Game1.player.addItemToInventory(new StardewValley.Object(BlueEmperorID, 1, false, -1, 0)); //Butterfly to drop
+                        Game1.playSound("pickUpItem");
+                    }
+                }
+                else if (e.Location is IslandWest or IslandNorth && item.Value is Tree tree9 && tree9.treeType.Value == 9) //Tree 9 is Island Palm
+                {
+                    if (new Random((int)(Game1.uniqueIDForThisGame + item.Key.X * 1000.0 + item.Key.Y * 11.0))
+                            .NextDouble() < 0.10) //10% chance to drop from the Island Palm tree
+                    {
+                        Game1.addHUDMessage(new("You found a Butterfly in the Island Palm Tree!", HUDMessage.achievement_type)); //Might remove message later
+                        Game1.player.addItemToInventory(new StardewValley.Object(BlueEmperorID, 1, false, -1, 0)); //Butterfly to drop
+                        Game1.playSound("pickUpItem");
+                    }
+                }
+
+
             }
+
+
         }
 
 
