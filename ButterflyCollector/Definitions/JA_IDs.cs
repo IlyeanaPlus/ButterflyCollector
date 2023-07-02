@@ -2,10 +2,10 @@
 
 namespace Butterfly_Collector.Definitions
 {
-    public class JA_IDs
+    public class CritterIDs
     {
         //JsonAssets API
-        private static IJsonAssetsApi JA_API;
+        public static IJsonAssetsApi JA_API;
 
         //JsonAssets IDs
         public static int BlueButterflyID => JA_API.GetObjectId("IlyBlueButterfly");

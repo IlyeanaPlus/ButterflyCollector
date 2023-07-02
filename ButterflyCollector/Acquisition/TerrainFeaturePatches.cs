@@ -9,24 +9,14 @@ using HarmonyLib;
 using StardewModdingAPI;
 using StardewValley.BellsAndWhistles;
 using System.Threading;
+using StardewValley.Events;
 
 namespace Butterfly_Collector.Acquisition
 {
-    public class TerrainFeaturePatches
-    {
-        
-        // Method to apply harmony patch
-        public static void Apply(Harmony harmony)
-        {
-            harmony.Patch(
-                original: AccessTools.Method(typeof(TerrainFeature), nameof(IWorldEvents),
-                prefix: new HarmonyMethod(typeof(TerrainFeaturePatches), nameof(TerrainFeatureListChanged))
-            ));  
-        }
-
-
+    public class TerrainFeaturePatch
+    { 
         //Terrain Feature Drops (Easy Way)
-        private void TerrainFeatureListChanged(object sender, TerrainFeatureListChangedEventArgs e)
+        public void TerrainFeatureListChanged(object sender, TerrainFeatureListChangedEventArgs e)
         { 
             foreach (KeyValuePair<Vector2, TerrainFeature> item in e.Removed)
             {
