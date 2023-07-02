@@ -3,15 +3,16 @@ using SpaceShared.APIs;
 using StardewModdingAPI;
 using StardewModdingAPI.Events;
 using StardewValley;
-using StardewValley.Events;
 using StardewValley.Locations;
 using StardewValley.TerrainFeatures;
+using StardewValley.Objects;
 using System.Collections.Generic;
 using System;
 using System.IO;
 using Microsoft.Xna.Framework;
-using xTile.Tiles;
-using static StardewValley.Debris;
+using System.Diagnostics;
+using Object = StardewValley.Object;
+using System.Linq;
 
 namespace Butterfly_Collector
 {
@@ -100,23 +101,26 @@ namespace Butterfly_Collector
 
         }
 
-        //Critter from Hollow Log
+        //Critter from Weeds
         private void OnDebrisListChanged(object sender, DebrisListChangedEventArgs e)
         {
-            foreach (GameLocation location in Game1.locations)
-            {
-                foreach (Debris debris in e.Removed)
+            if (e.Removed.Any())
+            {               
+                foreach (Debris d in e.Removed)
                 {
-                    if (location is Farm or IslandWest && debris.debrisType.Value is (DebrisType)602)
+                    if (e.Location is Farm or IslandWest && d.item?.Name is "Weeds")
+                        if (d.debrisType.Value == Debris.DebrisType.CHUNKS || d.debrisType.Value == Debris.DebrisType.SPRITECHUNKS || d.debrisType.Value == Debris.DebrisType.NUMBERS)
+                            continue;
                     {
                         //Some kind of math goes here to determine drop chance
 
                         Game1.player.addItemToInventory(new StardewValley.Object(MorningCloakID, 1, false, -1, 0));
-                        Game1.addHUDMessage(new("You found a Butterfly in the Log!", HUDMessage.achievement_type));
+                        Game1.addHUDMessage(new("You found a Butterfly in the Weeds!", HUDMessage.achievement_type));
                         Game1.playSound("pickUpItem");
                     }
                 }
-            }           
+            }
+                    
         }
         
 
